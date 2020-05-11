@@ -11,7 +11,7 @@ public class RoomController {
 
     RoomDatabase rooms = RoomDatabase.getInstance();
 
-    @GetMapping("/rooms/get")
+    @GetMapping("/rooms")
     public List<Room> get() {
         return rooms.fetchRooms();
     }
@@ -32,17 +32,17 @@ public class RoomController {
         rooms.updateRoom(room, roomName);
     }
 
-    @GetMapping("/rooms/averagetemp")
+    @GetMapping("/rooms/averageTemperature")
     public float weeklyTemperature(@RequestParam(name = "roomname") String roomName){
         return rooms.getWeeklyTemperature(roomName);
     }
 
-    @GetMapping("/rooms/averagetemp")
+    @GetMapping("/rooms/averageHumidity")
     public float weeklyHumidity(@RequestParam(name = "roomname") String roomName){
         return rooms.getWeeklyHumidity(roomName);
     }
 
-    @GetMapping("/rooms/averagetemp")
+    @GetMapping("/rooms/averageCO2")
     public float weeklyCO2(@RequestParam(name = "roomname") String roomName){
         return rooms.getWeeklyCO2(roomName);
     }

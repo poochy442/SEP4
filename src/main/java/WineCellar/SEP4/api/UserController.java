@@ -19,6 +19,11 @@ public class UserController {
         return users.fetchUsers();
     }
 
+    @GetMapping("/users/get")
+    public User get(@RequestParam(name = "username") String username){
+        return users.getUserByUsername(username);
+    }
+
     @GetMapping("users/login")
     public String login(@RequestParam(name = "username") String username,
                         @RequestParam(name = "password") String password){
