@@ -16,17 +16,17 @@ public class RoomController {
         return rooms.fetchRooms();
     }
 
-    @GetMapping("/rooms/get")
+    @GetMapping("/rooms")
     public Room get(@RequestParam(name = "roomname") String roomName) {
         return rooms.getRoomByName(roomName);
     }
 
-    @PostMapping("/rooms/create")
+    @PostMapping("/rooms")
     public void create(@RequestBody Room room) {
         rooms.addRoom(room);
     }
 
-    @PostMapping("/rooms/update")
+    @PutMapping("/rooms")
     public void update(@RequestBody Room room,
                        @RequestParam(name = "roomname") String roomName) {
         rooms.updateRoom(room, roomName);
