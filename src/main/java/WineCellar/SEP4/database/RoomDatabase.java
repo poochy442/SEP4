@@ -29,6 +29,10 @@ public class RoomDatabase {
     // Add room to database
     public void addRoom(Room room){
         rooms.add(room);
+        System.out.println("Added room "+room.getName());
+        System.out.println("Added room "+room.getName());
+        System.out.println("Added room "+room.getName());
+        System.out.println("Added room "+room.getName());
     }
 
     // Update a room
