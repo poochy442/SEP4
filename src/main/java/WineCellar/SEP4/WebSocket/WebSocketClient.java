@@ -1,5 +1,6 @@
 package WineCellar.SEP4.WebSocket;
 
+import WineCellar.SEP4.database.Adapter;
 import WineCellar.SEP4.database.RoomDatabase;
 import WineCellar.SEP4.resource.Response;
 import WineCellar.SEP4.resource.Room;
@@ -14,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class WebSocketClient implements WebSocket.Listener {
     private WebSocket server = null;
-    int random;
+    Adapter adapter;
     // Send down-link message to device
     // Must be in Json format according to https://github.com/ihavn/IoT_Semester_project/blob/master/LORA_NETWORK_SERVER.md
     public void sendDownLink(String jsonTelegram) {
@@ -23,8 +24,8 @@ public class WebSocketClient implements WebSocket.Listener {
 
     // E.g. url: "wss://iotnet.teracom.dk/app?token=??????????????????????????????????????????????="
     // Substitute ????????????????? with the token you have been given
-    public WebSocketClient(String url) {
-        random=1;
+    public WebSocketClient(String url, Adapter adapter) {
+        this.adapter=adapter;
         HttpClient client = HttpClient.newHttpClient();
         CompletableFuture<WebSocket> ws = client.newWebSocketBuilder()
                 .buildAsync(URI.create(url), this);
@@ -71,11 +72,11 @@ public class WebSocketClient implements WebSocket.Listener {
         gson=new Gson();
         String indented = (new JSONObject(data.toString())).toString(4);
         Response response = gson.fromJson(indented, Response.class);
-        if(random==1) {
-            RoomDatabase.getInstance().addRoom(new Room("RoomTest", response.getDataInt(), 0, 0));
-        random++;
-        }
-        System.out.println(response.getData()+" that is data >>"+response.getCmd()+" CMD >>>"+ response.getPort()+" port >>>"+response.getTs()+" ts>>>"+response.getEUI()+"donez");
+
+        if (response.getCmd().equals("rx"))
+        adapter.processResponse(response);
+
+        System.out.println(response.getData()+" << data"+response.getCmd()+"<< CMD "+ response.getPort()+"<< port "+response.getTs()+"<< ts"+response.getEUI()+"<<EUI and done");
         webSocket.request(1);
         return new CompletableFuture().completedFuture("onText() completed.").thenAccept(System.out::println);
     };

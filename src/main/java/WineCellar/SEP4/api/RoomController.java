@@ -1,22 +1,30 @@
 package WineCellar.SEP4.api;
 
+import WineCellar.SEP4.database.Adapter;
+import WineCellar.SEP4.database.Database;
 import WineCellar.SEP4.database.RoomDatabase;
 import WineCellar.SEP4.resource.Room;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @RestController
 public class RoomController {
 
     RoomDatabase rooms = RoomDatabase.getInstance();
-
+    Adapter adapter=Adapter.getInstance();
     @GetMapping("/rooms")
     public List<Room> get() {
-        return rooms.fetchRooms();
+        try {
+            return adapter.getAllRooms();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    @GetMapping("/rooms")
+    @GetMapping("/rooms/fghh")
     public Room get(@RequestParam(name = "roomname") String roomName) {
         return rooms.getRoomByName(roomName);
     }

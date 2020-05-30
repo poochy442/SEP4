@@ -29,24 +29,24 @@ public class RoomDatabase {
     // Add room to database
     public void addRoom(Room room){
         rooms.add(room);
-        System.out.println("Added room "+room.getName());
-        System.out.println("Added room "+room.getName());
-        System.out.println("Added room "+room.getName());
-        System.out.println("Added room "+room.getName());
+        System.out.println("Added room "+room.getRoomName());
+        System.out.println("Added room "+room.getRoomName());
+        System.out.println("Added room "+room.getRoomName());
+        System.out.println("Added room "+room.getRoomName());
     }
 
     // Update a room
     // Updates the room with the name @Param roomName with the attributes from @Param room
     public void updateRoom(Room room, String roomName){
         for(Room r : rooms){
-            if(r.getName().equals(roomName))
+            if(r.getRoomName().equals(roomName))
                 r = room;
         }
     }
 
     public void removeRoom(String roomName){
         for(Room r : rooms){
-            if(r.getName().equals(roomName))
+            if(r.getRoomName().equals(roomName))
                 rooms.remove(r);
         }
     }
@@ -55,7 +55,7 @@ public class RoomDatabase {
     // Return room when found, null when nothing is found
     public Room getRoomByName(String roomName){
         for(Room r : rooms){
-            if(r.getName().equals(roomName))
+            if(r.getRoomName().equals(roomName))
                 return r;
         }
         return null;
@@ -64,7 +64,7 @@ public class RoomDatabase {
     // Get weekly average temperature
     public float getWeeklyTemperature(String roomName){
         for(Room r : rooms){
-            if(r.getName().equals(roomName)){
+            if(r.getRoomName().equals(roomName)){
                 // TODO calculate average
                 return 0;
             }
@@ -75,7 +75,7 @@ public class RoomDatabase {
     // Get weekly average humidity
     public float getWeeklyHumidity(String roomName){
         for(Room r : rooms){
-            if(r.getName().equals(roomName)){
+            if(r.getRoomName().equals(roomName)){
                 // TODO calculate average
                 return 0;
             }
@@ -86,7 +86,7 @@ public class RoomDatabase {
     // Get weekly average CO2
     public float getWeeklyCO2(String roomName){
         for(Room r : rooms){
-            if(r.getName().equals(roomName)){
+            if(r.getRoomName().equals(roomName)){
                 // TODO calculate average
                 return 0;
             }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public class UserDatabase {
 
-    private List<User> users;
+    private ArrayList<User> users;
 
     private static UserDatabase instance = null;
     public static UserDatabase getInstance(){
