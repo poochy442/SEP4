@@ -22,7 +22,7 @@ public class Adapter implements IAdapter {
     }
 
     @Override
-    public void processResponse(Response response) {
+    public synchronized void  processResponse(Response response) {
         int value;
         System.out.println("adapter is ready to process response");
         switch (response.getPort()) {
@@ -64,11 +64,10 @@ public class Adapter implements IAdapter {
                 System.out.println("Adapter found bad port");
                 break;
         }
-
     }
 
     @Override
-    public Room getRoomMeasurement(String roomname) {
+    public synchronized Room getRoomMeasurement(String roomname) {
         try {
             return db.getRoomMeasurement(roomname);
         } catch (SQLException e) {
@@ -78,32 +77,82 @@ public class Adapter implements IAdapter {
     }
 
     @Override
-    public List<Room> getAllRooms(String username) {
+    public synchronized List<Room> getUserRooms(String username) {
+        try {
+            return db.getAllUserRooms(username);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
-    public void createUser(String username) {
-
+    public synchronized void createUser(String username) {
+        try {
+            db.createUser(username);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public Room getHistory(String roomName) {
+    public void updateUser(String old,String newuser) {
+        try {
+            db.changeUsername(old,newuser);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public synchronized List<Room> getHistory(String roomName) {
+        try {
+            return db.getRoomHistory(roomName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
-    public Room getWeeklyAverage(String roomName) {
+    public synchronized Room getWeeklyAverage(String roomName) {
+        try {
+            return db.getWeeklyAverages(roomName);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     @Override
-    public void createRoom(String username, String roomName, String roomEUI) {
-
+    public synchronized String createRoom(String username, String roomName, String roomEUI) {
+        try {
+            db.createRoom(username,roomName,roomEUI);
+            return "Success";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Room name already taken.";
+        }
     }
 
     @Override
-    public List<Room> getAllRooms() throws SQLException {
-        return db.getAllRooms();
+    public List<Room> getAllRooms()  {
+        try {
+            return db.getAllRooms();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public String deleteRoom(String roomName) {
+        try {
+            db.deleteRoom(roomName);
+            return "Success";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Database error occured";
+        }
     }
 }

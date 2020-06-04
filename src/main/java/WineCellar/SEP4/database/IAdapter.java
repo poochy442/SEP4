@@ -7,15 +7,18 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface IAdapter {
-
-    void processResponse(Response response);
+    List<Room> getUserRooms(String username);
     Room getRoomMeasurement(String roomname);
-    List<Room> getAllRooms(String username);
-    void createUser(String username);
-    Room getHistory(String roomName);
+    List<Room> getHistory(String roomName);
     Room getWeeklyAverage(String roomName);
 
+    void createUser(String username);
+    void updateUser(String old,String newuser);
 
-    void createRoom(String username,String roomName,String roomEUI);
-    List<Room> getAllRooms() throws SQLException;
+    String createRoom(String username,String roomName,String roomEUI);
+    String deleteRoom(String roomName);
+
+
+    void processResponse(Response response);
+    List<Room> getAllRooms();
 }

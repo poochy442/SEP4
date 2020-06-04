@@ -1,9 +1,7 @@
 package WineCellar.SEP4.WebSocket;
 
 import WineCellar.SEP4.database.Adapter;
-import WineCellar.SEP4.database.RoomDatabase;
 import WineCellar.SEP4.resource.Response;
-import WineCellar.SEP4.resource.Room;
 import com.google.gson.Gson;
 import org.json.JSONObject;
 import java.net.URI;

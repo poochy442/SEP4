@@ -5,6 +5,7 @@ import WineCellar.SEP4.resource.Room;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Database {
     Connection connection = null;
@@ -60,30 +61,39 @@ public class Database {
                 "INNER JOIN Measurement m ON m.measurement_ID=rhm.measurement_ID\n" +
                 "INNER JOIN MeasurementHasSensor mhs ON m.measurement_ID=mhs.measurement_ID\n" +
                 "INNER JOIN Sensor s ON s.sensor_ID=mhs.sensor_ID\n" +
-                "Where r.roomName='"+roomname+"' and timestamp = (select max(timestamp) from Measurement)";
+                "Where r.roomName='" + roomname + "' and timestamp = (select max(timestamp) from Measurement)";
 
         resultSet = statement.executeQuery(sql);
 
         while (resultSet.next()) {
+            System.out.println("reading values DB");
             switch (resultSet.getString(1)) {
                 case "Temperature":
                     room.setTemperature(resultSet.getInt(2));
+                    break;
                 case "Humidity":
                     room.setHumidity(resultSet.getInt(2));
+                    break;
                 case "Co2":
                     room.setCO2(resultSet.getInt(2));
-            }
-            sql="Select TOP 1 ast.state,ast.timestamp,a.acuatorName from Room r\n" +
-                    "JOIN RoomHasAcuatorState rhas on rhas.room_ID=r.room_ID\n" +
-                    "join AcuatorState ast on ast.state_ID=rhas.state_ID\n" +
-                    "join Acuator a on a.acuator_ID=ast.acuator_ID\n" +
-                    "where roomName='"+roomname+"'\n" +
-                    "order by ast.state_ID desc";
-            resultSet = statement.executeQuery(sql);
-            while (resultSet.next()) {
-                room.setAcuator(resultSet.getInt(1));
+                    break;
+                default:
+                    room.setEUI("bug");
+                    break;
             }
         }
+        sql = "Select TOP 1 ast.state,ast.timestamp,a.acuatorName from Room r\n" +
+                "JOIN RoomHasAcuatorState rhas on rhas.room_ID=r.room_ID\n" +
+                "JOIN AcuatorState ast on ast.state_ID=rhas.state_ID\n" +
+                "JOIN Acuator a on a.acuator_ID=ast.acuator_ID\n" +
+                "WHERE roomName='" + roomname + "'\n" +
+                "order by ast.state_ID desc";
+        resultSet = statement.executeQuery(sql);
+        while (resultSet.next()) {
+            room.setAcuator(resultSet.getInt(1));
+        }
+
+        room.setRoomName(roomname);
         return room;
     }
 
@@ -91,7 +101,8 @@ public class Database {
         statement = connection.createStatement();
         String sql = "INSERT INTO Measurement(timestamp,value) Values (" + ts + "," + value + ");";
         statement.execute(sql);
-        sql = "select measurement_ID from Measurement";
+        //select last
+        sql = "SELECT SCOPE_IDENTITY();";
         resultSet = statement.executeQuery(sql);
         int Measurement_id = 0;
         while (resultSet.next()) {
@@ -130,7 +141,7 @@ public class Database {
         String sql = "select distinct roomName from Users u\n" +
                 "INNER JOIN UserHasRoom uhr ON u.user_ID=uhr.user_ID\n" +
                 "INNER JOIN Room r ON r.room_ID=uhr.room_ID\n" +
-                "where username='"+username+"'";
+                "where username='" + username + "'";
         resultSet = statement.executeQuery(sql);
         String roomName;
         while (resultSet.next()) {
@@ -184,8 +195,8 @@ public class Database {
             acuator_id = resultSet.getInt(1);
             room_id = resultSet.getInt(2);
         }
-
-        sql = "SELECT TOP 1 * FROM AcuatorState ORDER BY state_ID DESC ";
+//use SELECT SCOPE_IDENTITY();
+        sql = "SELECT SCOPE_IDENTITY(); ";
         resultSet = statement.executeQuery(sql);
         while (resultSet.next()) {
             state_ID = resultSet.getInt(1);
@@ -197,25 +208,96 @@ public class Database {
 
     }
 
-
     public void createUser(String username) throws SQLException {
         statement = connection.createStatement();
-        String sql="\n" +
-                "Insert into Users(username)\n" +
-                "VALUES ('"+username+"');";
+        String sql = "INSERT INTO Users(username)\n" +
+                "VALUES ('" + username + "');";
         statement.execute(sql);
     }
 
-    public void changeUsername(String user,String usernamenew) throws SQLException {
+    public void changeUsername(String user, String usernamenew) throws SQLException {
         statement = connection.createStatement();
-        String sql="UPDATE Users\n" +
-                "SET username = '"+usernamenew+ "' WHERE username='"+user+"';";
+        String sql = "UPDATE Users\n" +
+                "SET username = '" + usernamenew + "' WHERE username='" + user + "';";
         statement.execute(sql);
     }
 
     public void deleteRoom(String roomName) throws SQLException {
         statement = connection.createStatement();
-        String sql = "UPDATE Room Set activated=false WHERE roomName='"+roomName+"';";
+        //cha ge date to
+        String sql = "UPDATE Room Set activated=false WHERE roomName='" + roomName + "';";
         statement.execute(sql);
+    }
+
+    public Room getWeeklyAverages(String roomName) throws SQLException {
+        Room room = new Room();
+        statement = connection.createStatement();
+        String sql = "SELECT sensorName,AVG(value) FROM Measurement m\n" +
+                "INNER JOIN MeasurementHasSensor mhs ON m.measurement_ID=mhs.measurement_ID\n" +
+                "INNER JOIN Sensor s on s.sensor_ID=mhs.sensor_ID\n" +
+                "WHERE DATEADD(ms, timestamp / 86400000, (timestamp / 86400000) + 25567) > DATEADD(Day,-7,GETDATE())\n" +
+                "GROUP BY sensorName";
+        resultSet = statement.executeQuery(sql);
+        while (resultSet.next()) {
+            System.out.println("reading values DB");
+            switch (resultSet.getString(1)) {
+                case "Temperature":
+                    room.setTemperature(resultSet.getInt(2));
+                    break;
+                case "Humidity":
+                    room.setHumidity(resultSet.getInt(2));
+                    break;
+                case "Co2":
+                    room.setCO2(resultSet.getInt(2));
+                    break;
+                default:
+                    room.setEUI("bug");
+                    break;
+            }
+        }
+        room.setRoomName(roomName);
+        return room;
+    }
+
+    public List<Room> getRoomHistory(String roomName) throws SQLException {
+        ArrayList<Room> rooms = new ArrayList<>();
+        statement = connection.createStatement();
+        String sql = "SELECT sensorName,AVG(value) FROM Measurement m\n" +
+                "INNER JOIN MeasurementHasSensor mhs ON m.measurement_ID=mhs.measurement_ID\n" +
+                "INNER JOIN Sensor s on s.sensor_ID=mhs.sensor_ID\n" +
+                "WHERE DATEADD(ms, timestamp / 86400000, (timestamp / 86400000) + 25567) > DATEADD(Day,-7,GETDATE())\n" +
+                "GROUP BY sensorName";
+        resultSet = statement.executeQuery(sql);
+        while (resultSet.next()) {
+
+        }
+        return null;
+    }
+
+
+
+    public void createRoom(String username, String roomName, String EUI) throws SQLException {
+        statement = connection.createStatement();
+        String sql = "INSERT INTO Room(roomName,roomEUI)\n" +
+                "VALUES ('" + roomName + "','" + EUI + "');";
+        statement.execute(sql);
+        int roomID = 0;
+        int user_ID = 0;
+        sql = "SELECT SCOPE_IDENTITY(); ";
+        resultSet = statement.executeQuery(sql);
+        while (resultSet.next()) {
+            roomID = resultSet.getInt(1);
+        }
+
+        sql = "SELECT user_ID FROM Users WHERE username='" + username + "'";
+        resultSet = statement.executeQuery(sql);
+        while (resultSet.next()) {
+            user_ID = resultSet.getInt(1);
+        }
+        sql = "INSERT INTO UserHasRoom(user_ID,room_ID)\n" +
+                "VALUES (" + user_ID + "," + roomID + ");";
+        statement.execute(sql);
+
+        //TODO : INSERT SENSORS???
     }
 }
