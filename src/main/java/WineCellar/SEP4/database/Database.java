@@ -109,17 +109,17 @@ public class Database {
             Measurement_id = resultSet.getInt(1);
         }
 
-        sql = "select Sensor.sensor_ID from Room r\n" +
+        sql = "SELECT Sensor.sensor_ID FROM Room r\n" +
                 "JOIN Sensor ON r.room_ID=Sensor.room_ID\n" +
-                "Where r.roomEUI='" + eui + "' and Sensor.sensorName='" + sensorName + "';";
+                "WHERE r.roomEUI='" + eui + "' AND Sensor.sensorName='" + sensorName + "';";
         resultSet = statement.executeQuery(sql);
         int Sensor_ID = 0;
         while (resultSet.next()) {
             Sensor_ID = resultSet.getInt(1);
         }
 
-        sql = "select * from Room\n" +
-                "Where Room.roomEUI='" + eui + "';";
+        sql = "SELECT * FROM Room\n" +
+                "WHERE Room.roomEUI='" + eui + "';";
         resultSet = statement.executeQuery(sql);
         int Room_ID = 0;
         while (resultSet.next()) {
@@ -138,10 +138,10 @@ public class Database {
     public ArrayList<Room> getAllUserRooms(String username) throws SQLException {
         ArrayList<Room> items = new ArrayList<>();
         statement = connection.createStatement();
-        String sql = "select distinct roomName from Users u\n" +
+        String sql = "SELECT DISTINCT roomName FROM Users u\n" +
                 "INNER JOIN UserHasRoom uhr ON u.user_ID=uhr.user_ID\n" +
                 "INNER JOIN Room r ON r.room_ID=uhr.room_ID\n" +
-                "where username='" + username + "'";
+                "WHERE username='" + username + "'";
         resultSet = statement.executeQuery(sql);
         String roomName;
         while (resultSet.next()) {
@@ -151,36 +151,6 @@ public class Database {
         return items;
     }
 
-
-    public void addHumidityMeasurement(int value, String eui, long ts) throws SQLException {
-        statement = connection.createStatement();
-        String sql = "INSERT INTO Measurement(timestamp,value) Values (" + ts + "," + value + ");";
-        statement.execute(sql);
-        sql = "SELECT TOP 1 * FROM Measurement ORDER BY measurement_ID DESC ";
-        resultSet = statement.executeQuery(sql);
-        int Measurement_id = 0;
-        while (resultSet.next()) {
-            Measurement_id = resultSet.getInt(1);
-        }
-        sql = "select Sensor.sensor_ID,r.room_ID from Room r\n" +
-                "JOIN Sensor ON r.room_ID=Sensor.room_ID\n" +
-                "Where r.roomEUI='" + eui + "' and Sensor.sensorName='Humidity';";
-        resultSet = statement.executeQuery(sql);
-        int Sensor_ID = 0;
-        int Room_ID = 0;
-        while (resultSet.next()) {
-            Sensor_ID = resultSet.getInt(1);
-            Room_ID = resultSet.getInt(2);
-        }
-
-        sql = "INSERT INTO RoomHasMeasurement(room_ID,measurement_ID) Values (" + Room_ID + "," + Measurement_id + ");";
-        statement.execute(sql);
-
-        sql = "INSERT INTO MeasurementHasSensor(measurement_ID,sensor_ID) Values (" + Measurement_id + "," + Sensor_ID + ");";
-        statement.execute(sql);
-
-
-    }
 
     public void addServoState(int value, String eui, long ts) throws SQLException {
         statement = connection.createStatement();
@@ -271,12 +241,15 @@ public class Database {
         while (resultSet.next()) {
 
         }
+        //TODO:all
         return null;
     }
 
 
 
     public void createRoom(String username, String roomName, String EUI) throws SQLException {
+
+        //add datefrom
         statement = connection.createStatement();
         String sql = "INSERT INTO Room(roomName,roomEUI)\n" +
                 "VALUES ('" + roomName + "','" + EUI + "');";
@@ -298,6 +271,21 @@ public class Database {
                 "VALUES (" + user_ID + "," + roomID + ");";
         statement.execute(sql);
 
-        //TODO : INSERT SENSORS???
+        sql = "INSERT INTO Sensor(room_ID,sensorName,sensorUnit)\n" +
+                "VALUES (" + roomID + ",'Temperature', 'Celsius');";
+        statement.execute(sql);
+
+        sql = "INSERT INTO Sensor(room_ID,sensorName,sensorUnit)\n" +
+                "VALUES (" + roomID + ",'Humidity', '%');";
+        statement.execute(sql);
+
+        sql = "INSERT INTO Sensor(room_ID,sensorName,sensorUnit)\n" +
+                "VALUES (" + roomID + ",'Co2', 'Parts-per-million');";
+        statement.execute(sql);
+
+        sql = "INSERT INTO Acuator(room_ID,acuatorName)\n" +
+                "VALUES (" + roomID + ",'WindowControl');";
+        statement.execute(sql);
+
     }
 }
