@@ -3,14 +3,13 @@ package WineCellar.SEP4.api;
 import WineCellar.SEP4.database.Adapter;
 import org.springframework.web.bind.annotation.*;
 
-@RestController("users")
+@RestController
 public class UserController {
 
     Adapter adapter=Adapter.getInstance();
 
-    @PostMapping("/users/create")
-    public void create(@RequestParam(name = "username") String username,
-                         @RequestParam(name = "password") String password){
+    @PostMapping("/users")
+    public void create(@RequestParam(name = "username") String username){
         adapter.createUser(username);
     }
 

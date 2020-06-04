@@ -10,19 +10,19 @@ import java.util.List;
 public class RoomController {
 
     Adapter adapter=Adapter.getInstance();
-    @GetMapping("/rooms")
+    @GetMapping("/rooms/allrooms")
     public List<Room> get() {
             return adapter.getAllRooms();
-    }
-
-    @GetMapping("/rooms/get")
-    public Room getRoomMeasurement(@RequestParam(name = "roomname") String roomname) {
-        return adapter.getRoomMeasurement(roomname);
     }
 
     @GetMapping("/rooms/all")
     public List<Room> getUserRooms(@RequestParam(name = "username") String username) {
         return adapter.getUserRooms(username);
+    }
+
+    @GetMapping("/rooms")
+    public Room getRoomMeasurement(@RequestParam(name = "roomname") String roomname) {
+        return adapter.getRoomMeasurement(roomname);
     }
 
     @PostMapping("/rooms")
