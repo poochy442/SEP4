@@ -51,7 +51,7 @@ public class Database {
     }
 
     public Room getRoomMeasurement(String roomname) throws SQLException {
-        Room room = new Room();
+        Room room = new Room(roomname);
         statement = connection.createStatement();
         String sql = "SELECT DISTINCT sensorName,value,timestamp from Room r\n" +
                 "INNER JOIN RoomHasMeasurement rhm ON r.room_ID=rhm.room_ID\n" +
@@ -90,7 +90,6 @@ public class Database {
             room.setAcuator(resultSet.getInt(1));
         }
 
-        room.setRoomName(roomname);
         return room;
     }
 
@@ -148,7 +147,7 @@ public class Database {
 
     public void addServoState(int value, String eui, long ts) throws SQLException {
         statement = connection.createStatement();
-        String sql = "select acuator_ID,a.room_ID from Room r\n" +
+        String sql = "SELECT acuator_ID,a.room_ID from Room r\n" +
                 "                JOIN Acuator a ON r.room_ID=a.room_ID\n" +
                 "                Where r.roomEUI='" + eui + "';";
         resultSet = statement.executeQuery(sql);
@@ -159,13 +158,15 @@ public class Database {
             acuator_id = resultSet.getInt(1);
             room_id = resultSet.getInt(2);
         }
+
+        sql = "INSERT INTO AcuatorState(acuator_ID,state,timestamp) Values (" + acuator_id + "," + value + "," + ts + ");";
+        statement.execute(sql);
         sql = "SELECT SCOPE_IDENTITY(); ";
         resultSet = statement.executeQuery(sql);
         while (resultSet.next()) {
             state_ID = resultSet.getInt(1);
         }
-        sql = "INSERT INTO AcuatorState(acuator_ID,state,timestamp) Values (" + acuator_id + "," + value + "," + ts + ");";
-        statement.execute(sql);
+
         sql = "INSERT INTO RoomHasAcuatorState(room_ID,state_ID) Values (" + room_id + "," + state_ID + ");";
         statement.execute(sql);
     }
