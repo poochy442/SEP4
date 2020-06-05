@@ -27,10 +27,10 @@ public class Adapter implements IAdapter {
         System.out.println("adapter is ready to process response");
         switch (response.getPort()) {
             case 1:
-                String humidity=response.getData().substring(0,4);
-                String temperature=response.getData().substring(4,8);
+                String temperature=response.getData().substring(0,4);
+                String humidity=response.getData().substring(4,8);
                 String co2=response.getData().substring(8,12);
-                value = Integer.parseInt(humidity);
+                value = Integer.parseInt(humidity,16);
                 try {
                     db.addMeasurement(value, response.getEUI(), response.getTs(), "Humidity");
                     System.out.println("Added humidity measurement successfully.");

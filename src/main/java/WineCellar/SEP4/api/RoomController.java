@@ -34,6 +34,7 @@ public class RoomController {
     public Room weeklyAverage(@RequestParam(name = "roomname") String roomName){
         return adapter.getWeeklyAverage(roomName);
     }
+
     @GetMapping("/rooms/history")
     public List<Room> roomHistory(@RequestParam(name = "roomname") String roomName){
         return adapter.getHistory(roomName);

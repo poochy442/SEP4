@@ -30,14 +30,12 @@ public class Database {
         }
     }
 
-
     public synchronized static Database getInstance() {
         if (instance == null) {
             instance = new Database();
         }
         return instance;
     }
-
 
     public ArrayList<Room> getAllRooms() throws SQLException {
         ArrayList<Room> items = new ArrayList<>();
@@ -52,16 +50,15 @@ public class Database {
         return items;
     }
 
-
     public Room getRoomMeasurement(String roomname) throws SQLException {
         Room room = new Room();
         statement = connection.createStatement();
-        String sql = "select distinct sensorName,value,timestamp from Room r\n" +
+        String sql = "SELECT DISTINCT sensorName,value,timestamp from Room r\n" +
                 "INNER JOIN RoomHasMeasurement rhm ON r.room_ID=rhm.room_ID\n" +
                 "INNER JOIN Measurement m ON m.measurement_ID=rhm.measurement_ID\n" +
                 "INNER JOIN MeasurementHasSensor mhs ON m.measurement_ID=mhs.measurement_ID\n" +
                 "INNER JOIN Sensor s ON s.sensor_ID=mhs.sensor_ID\n" +
-                "Where r.roomName='" + roomname + "' and timestamp = (select max(timestamp) from Measurement)";
+                "Where r.roomName='" + roomname + "' and timestamp = (select max(timestamp) from Measurement) AND ValidTo>GETDATE()";
 
         resultSet = statement.executeQuery(sql);
 
@@ -101,7 +98,6 @@ public class Database {
         statement = connection.createStatement();
         String sql = "INSERT INTO Measurement(timestamp,value) Values (" + ts + "," + value + ");";
         statement.execute(sql);
-        //select last
         sql = "SELECT SCOPE_IDENTITY();";
         resultSet = statement.executeQuery(sql);
         int Measurement_id = 0;
@@ -131,9 +127,7 @@ public class Database {
 
         sql = "INSERT INTO MeasurementHasSensor(measurement_ID,sensor_ID) Values (" + Measurement_id + "," + Sensor_ID + ");";
         statement.execute(sql);
-
     }
-
 
     public ArrayList<Room> getAllUserRooms(String username) throws SQLException {
         ArrayList<Room> items = new ArrayList<>();
@@ -141,7 +135,8 @@ public class Database {
         String sql = "SELECT DISTINCT roomName FROM Users u\n" +
                 "INNER JOIN UserHasRoom uhr ON u.user_ID=uhr.user_ID\n" +
                 "INNER JOIN Room r ON r.room_ID=uhr.room_ID\n" +
-                "WHERE username='" + username + "'";
+                "WHERE username='" + username + "' and ValidTo>GETDATE()";
+
         resultSet = statement.executeQuery(sql);
         String roomName;
         while (resultSet.next()) {
@@ -150,7 +145,6 @@ public class Database {
         }
         return items;
     }
-
 
     public void addServoState(int value, String eui, long ts) throws SQLException {
         statement = connection.createStatement();
@@ -165,7 +159,6 @@ public class Database {
             acuator_id = resultSet.getInt(1);
             room_id = resultSet.getInt(2);
         }
-//use SELECT SCOPE_IDENTITY();
         sql = "SELECT SCOPE_IDENTITY(); ";
         resultSet = statement.executeQuery(sql);
         while (resultSet.next()) {
@@ -175,7 +168,6 @@ public class Database {
         statement.execute(sql);
         sql = "INSERT INTO RoomHasAcuatorState(room_ID,state_ID) Values (" + room_id + "," + state_ID + ");";
         statement.execute(sql);
-
     }
 
     public void createUser(String username) throws SQLException {
@@ -194,8 +186,7 @@ public class Database {
 
     public void deleteRoom(String roomName) throws SQLException {
         statement = connection.createStatement();
-        //cha ge date to
-        String sql = "UPDATE Room Set activated=false WHERE roomName='" + roomName + "';";
+        String sql = "UPDATE Room Set ValidTo=GETDATE() WHERE roomName='" + roomName + "';";
         statement.execute(sql);
     }
 
@@ -241,18 +232,14 @@ public class Database {
         while (resultSet.next()) {
 
         }
-        //TODO:all
+        //TODO:select query
         return null;
     }
 
-
-
     public void createRoom(String username, String roomName, String EUI) throws SQLException {
-
-        //add datefrom
         statement = connection.createStatement();
-        String sql = "INSERT INTO Room(roomName,roomEUI)\n" +
-                "VALUES ('" + roomName + "','" + EUI + "');";
+        String sql = "INSERT INTO Room(roomName,roomEUI,ValidTo,ValidFrom)\n" +
+                "VALUES ('" + roomName + "','" + EUI + "','2030-04-28',GETDATE());";
         statement.execute(sql);
         int roomID = 0;
         int user_ID = 0;
@@ -286,6 +273,5 @@ public class Database {
         sql = "INSERT INTO Acuator(room_ID,acuatorName)\n" +
                 "VALUES (" + roomID + ",'WindowControl');";
         statement.execute(sql);
-
     }
 }
