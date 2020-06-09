@@ -27,8 +27,8 @@ public class Adapter implements IAdapter {
         System.out.println("adapter is ready to process response");
         switch (response.getPort()) {
             case 1:
-                String temperature=response.getData().substring(0,4);
-                String humidity=response.getData().substring(4,8);
+                String humidity=response.getData().substring(0,4);
+                String temperature=response.getData().substring(4,8);
                 String co2=response.getData().substring(8,12);
                 value = Integer.parseInt(humidity,16);
                 try {
@@ -53,7 +53,7 @@ public class Adapter implements IAdapter {
                 }
                 break;
             case 2:
-                value = Integer.parseInt(response.getData());
+                value = Integer.parseInt(response.getData(),16);
                 try {
                     db.addServoState(value, response.getEUI(), response.getTs());
                 } catch (SQLException e) {

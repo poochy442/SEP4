@@ -22,7 +22,7 @@ public class Database {
         }
         try {
             String url = "jdbc:sqlserver://localhost;database=WineSep4;";
-            this.connection = DriverManager.getConnection(url, "server", "password");
+            this.connection = DriverManager.getConnection(url, "second", "password");
             System.out.println("Connection established ");
         } catch (Exception exception) {
             System.out.println("Connection failed");
@@ -137,7 +137,7 @@ public class Database {
                 "WHERE username='" + username + "' and ValidTo>GETDATE()";
 
         resultSet = statement.executeQuery(sql);
-        String roomName;
+
         while (resultSet.next()) {
             Room item = new Room(resultSet.getString(1));
             items.add(item);

@@ -14,13 +14,5 @@ public class Sep4Application {
 	public static void main(String[] args) {
 		WebSocketClient client=new WebSocketClient("wss://iotnet.teracom.dk/app?token=vnoSzwAAABFpb3RuZXQudGVyYWNvbS5ka9oKoZjjuRRrYXdGtr_qztU=",Adapter.getInstance());
 		SpringApplication.run(Sep4Application.class, args);
-
-		long a=1591359558197L;
-
-		Response response=new Response("0027002500c5", 1, "0004A30B00251001", "rx",a);
-		Adapter.getInstance().processResponse(response);
-
-		Date date=new Date(a);
-		System.out.println(date.toString());
 	}
 }
