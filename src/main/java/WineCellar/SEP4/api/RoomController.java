@@ -1,6 +1,6 @@
 package WineCellar.SEP4.api;
 
-import WineCellar.SEP4.database.RoomDatabase;
+import WineCellar.SEP4.database.Adapter;
 import WineCellar.SEP4.resource.Room;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,42 +9,39 @@ import java.util.List;
 @RestController
 public class RoomController {
 
-    RoomDatabase rooms = RoomDatabase.getInstance();
-
-    @GetMapping("/rooms")
+    Adapter adapter=Adapter.getInstance();
+    @GetMapping("/rooms/allrooms")
     public List<Room> get() {
-        return rooms.fetchRooms();
+            return adapter.getAllRooms();
+    }
+
+    @GetMapping("/rooms/all")
+    public List<Room> getUserRooms(@RequestParam(name = "username") String username) {
+        return adapter.getUserRooms(username);
     }
 
     @GetMapping("/rooms")
-    public Room get(@RequestParam(name = "roomname") String roomName) {
-        return rooms.getRoomByName(roomName);
+    public Room getRoomMeasurement(@RequestParam(name = "roomname") String roomname) {
+        return adapter.getRoomMeasurement(roomname);
     }
 
     @PostMapping("/rooms")
-    public void create(@RequestBody Room room) {
-        rooms.addRoom(room);
+    public String create(@RequestParam(name = "username") String userName,@RequestBody Room room) {
+        return  adapter.createRoom(userName,room.getRoomName(),room.getEUI());
     }
 
-    @PutMapping("/rooms")
-    public void update(@RequestBody Room room,
-                       @RequestParam(name = "roomname") String roomName) {
-        rooms.updateRoom(room, roomName);
+    @GetMapping("/rooms/average")
+    public Room weeklyAverage(@RequestParam(name = "roomname") String roomName){
+        return adapter.getWeeklyAverage(roomName);
     }
 
-    @GetMapping("/rooms/averageTemperature")
-    public float weeklyTemperature(@RequestParam(name = "roomname") String roomName){
-        return rooms.getWeeklyTemperature(roomName);
+    @GetMapping("/rooms/history")
+    public List<Room> roomHistory(@RequestParam(name = "roomname") String roomName){
+        return adapter.getHistory(roomName);
     }
 
-    @GetMapping("/rooms/averageHumidity")
-    public float weeklyHumidity(@RequestParam(name = "roomname") String roomName){
-        return rooms.getWeeklyHumidity(roomName);
+    @DeleteMapping("/rooms")
+    public String deleteRoom(@RequestParam(name = "roomname") String roomName){
+        return adapter.deleteRoom(roomName);
     }
-
-    @GetMapping("/rooms/averageCO2")
-    public float weeklyCO2(@RequestParam(name = "roomname") String roomName){
-        return rooms.getWeeklyCO2(roomName);
-    }
-
 }
